@@ -72,8 +72,13 @@ d3.json(url, function (error, result) {
 
 var csvData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTB1cK_oktZeJY1YnW9tAh8BsyJt-wH12d1qdPoSYil---tmpy-GuKdSl6t3cWCUiwuvbsBaYl4xVR/pub?gid=1609137887&single=true&output=csv';
 
-var data2 = d3.csv(csvData);
-console.log(data2);
+
+
+
+d3.csv(csvData).then(function(data) {
+console.log(data);
+});
+console.log(data);
 
 
 
