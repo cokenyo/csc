@@ -124,15 +124,15 @@ var data = [
         values = Object.values(element);
         console.log(keys);
         console.log(values);
-        keys.slice(1).forEach((element, index) => {
-          var newRating = {key: values[0], date: keys[index+1], value: values[index+1]};
+        keys.slice(2).forEach((element, index) => {
+          var newRating = {key: values[1], date: keys[index+1], value: values[index+1]};
           newPerson.push(newRating);
         });
         seriesB.push(newPerson);
 
       });
 
-    console.log(series);
+    console.log(data);
     console.log(seriesB);
 
     var legend = ["PersonA", "PersonB", "PersonC"];
