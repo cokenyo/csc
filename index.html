@@ -76,9 +76,9 @@ var csvData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTB1cK_oktZeJY1Y
 
 
 d3.csv(csvData).then(function(data) {
-console.log(data);
+  createGraph();
 });
-console.log(data);
+//console.log(data);
 
 
 
@@ -112,78 +112,84 @@ var data = [
     });
   });
 */
-    var seriesB = [];
 
-    data.forEach((element, index) => {
-      var newPerson = [];
-      keys = Object.keys(element);
-      values = Object.values(element);
-      console.log(keys);
-      console.log(values);
-      keys.slice(1).forEach((element, index) => {
-        var newRating = {key: values[0], date: keys[index+1], value: values[index+1]};
-        newPerson.push(newRating);
+  function createGraph() {
+
+
+      var seriesB = [];
+
+      data.forEach((element, index) => {
+        var newPerson = [];
+        keys = Object.keys(element);
+        values = Object.values(element);
+        console.log(keys);
+        console.log(values);
+        keys.slice(1).forEach((element, index) => {
+          var newRating = {key: values[0], date: keys[index+1], value: values[index+1]};
+          newPerson.push(newRating);
+        });
+        seriesB.push(newPerson);
+
       });
-      seriesB.push(newPerson);
 
-    });
+    console.log(series);
+    console.log(seriesB);
 
-  console.log(series);
-  console.log(seriesB);
+    var legend = ["PersonA", "PersonB", "PersonC"];
+    var legend2 = ["MD1", "MD2", "MD3"];
 
-  var legend = ["PersonA", "PersonB", "PersonC"];
-  var legend2 = ["MD1", "MD2", "MD3"];
+    var x = d3.scalePoint()
+        .domain(legend2) //what start and stop value for x axis
+        .range([0, width]); //physical pixels
 
-  var x = d3.scalePoint()
-      .domain(legend2) //what start and stop value for x axis
-      .range([0, width]); //physical pixels
+    var y = d3.scaleLinear()
+        .domain([0, 2])//.domain([0, d3.max(series, function(s) { return d3.max(s, function(d) { return d.value; }); })])
+        .range([height, 0]);
 
-  var y = d3.scaleLinear()
-      .domain([0, 2])//.domain([0, d3.max(series, function(s) { return d3.max(s, function(d) { return d.value; }); })])
-      .range([height, 0]);
+    var z = d3.scaleOrdinal(d3.schemeCategory10);
 
-  var z = d3.scaleOrdinal(d3.schemeCategory10);
+    g.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
 
-  g.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height + ")")
-      .call(d3.axisBottom(x));
+    var serie = g.selectAll(".serie")
+        .data(seriesB)
+      .enter().append("g")
+        .attr("class", "serie");
 
-  var serie = g.selectAll(".serie")
-      .data(seriesB)
-    .enter().append("g")
-      .attr("class", "serie");
+        //making lines
+    serie.append("path")
+        .attr("class", "line")
+        .style("stroke", function(d) { return z(d[0].key); })
+        .attr("d", d3.line()
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.value); }));
 
-      //making lines
-  serie.append("path")
-      .attr("class", "line")
-      .style("stroke", function(d) { return z(d[0].key); })
-      .attr("d", d3.line()
-          .x(function(d) { return x(d.date); })
-          .y(function(d) { return y(d.value); }));
+        //setting up labels
+    var label = serie.selectAll(".label")
+        .data(function(d) { return d; })
+      .enter().append("g")
+        .attr("class", "label")
+        .attr("transform", function(d, i) { return "translate(" + x(d.date) + "," + y(d.value) + ")"; });
 
-      //setting up labels
-  var label = serie.selectAll(".label")
-      .data(function(d) { return d; })
-    .enter().append("g")
-      .attr("class", "label")
-      .attr("transform", function(d, i) { return "translate(" + x(d.date) + "," + y(d.value) + ")"; });
+        //line and element labels
+    label.append("text")
+        .attr("dy", ".35em")
+        .text(function(d) { return d.value; })
+      .filter(function(d, i) { return i === data.length - 1; })
+      .append("tspan")
+        .attr("class", "label-key")
+        .text(function(d) { return " " + d.key; });
 
-      //line and element labels
-  label.append("text")
-      .attr("dy", ".35em")
-      .text(function(d) { return d.value; })
-    .filter(function(d, i) { return i === data.length - 1; })
-    .append("tspan")
-      .attr("class", "label-key")
-      .text(function(d) { return " " + d.key; });
+        //padding for labels
+    label.insert("rect", "text")
+        .datum(function() { return this.nextSibling.getBBox(); })
+        .attr("x", function(d) { return d.x - labelPadding; })
+        .attr("y", function(d) { return d.y - labelPadding; })
+        .attr("width", function(d) { return d.width + 2 * labelPadding; })
+        .attr("height", function(d) { return d.height + 2 * labelPadding; });
 
-      //padding for labels
-  label.insert("rect", "text")
-      .datum(function() { return this.nextSibling.getBBox(); })
-      .attr("x", function(d) { return d.x - labelPadding; })
-      .attr("y", function(d) { return d.y - labelPadding; })
-      .attr("width", function(d) { return d.width + 2 * labelPadding; })
-      .attr("height", function(d) { return d.height + 2 * labelPadding; });
+  }
 
 </script>
