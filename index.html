@@ -76,7 +76,7 @@ var csvData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTB1cK_oktZeJY1Y
 
 
 d3.csv(csvData).then(function(data) {
-  createGraph();
+  createGraph(data);
 });
 //console.log(data);
 
@@ -113,7 +113,7 @@ var data = [
   });
 */
 
-  function createGraph() {
+  function createGraph(data) {
 
 
       var seriesB = [];
