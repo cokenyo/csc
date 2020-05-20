@@ -164,6 +164,7 @@ var data = [
         .attr("class", "line")
         .style("stroke", function(d) { return z(d[0].key); })
         .attr("d", d3.line()
+            .defined(function(d) { return d.close != 0; })
             .x(function(d) { return x(d.date); })
             .y(function(d) { return y(d.value); }));
 
