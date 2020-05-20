@@ -124,8 +124,9 @@ var data = [
         values = Object.values(element);
         console.log(keys);
         console.log(values);
-        keys.slice(2).forEach((element, index) => {
-          var newRating = {key: values[1], date: keys[index+1], value: values[index+1]};
+        var skippedRows = 2;
+        keys.slice(skippedRows).forEach((element, index) => {
+          var newRating = {key: values[1], date: keys[index+skippedRows], value: values[index+skippedRows]};
           newPerson.push(newRating);
         });
         seriesB.push(newPerson);
