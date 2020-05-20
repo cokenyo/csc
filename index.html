@@ -144,7 +144,7 @@ var data = [
         .range([0, width]); //physical pixels
 
     var y = d3.scaleLinear()
-        .domain([0, 2])//.domain([0, d3.max(series, function(s) { return d3.max(s, function(d) { return d.value; }); })])
+        .domain([0, d3.max(seriesB, function(s) { return d3.max(s, function(d) { return d.value; }); })])//.domain([0, d3.max(series, function(s) { return d3.max(s, function(d) { return d.value; }); })])
         .range([height, 0]);
 
     var z = d3.scaleOrdinal(d3.schemeCategory10);
