@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+.label {
+  text-anchor: middle;
+}
+
+.label rect {
+  fill: white;
+}
+
+.label-key {
+  font-weight: bold;
+}
+
+</style>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script>
+
+var parseTime = d3.timeParse("%Y");
+
+var svg = d3.select("svg");
+
+var margin = {top: 30, right: 50, bottom: 30, left: 30},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    labelPadding = 3;
+
+var g = svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+/*var data = [
+{date:"MD1", Apples:1.30, Bananas:.40, Pickles:.22},
+{date:"MD2", Apples:1.89, Bananas:.84, Pickles:.33},
+{date:"MD3", Apples:1.39, Bananas:.24, Pickles:.53}     
+];*/
+
+var sKey = "1moczdbrfFwCp0L4Ube1a4GevuDcj2XQmCnpjArF_UEY";
+
+//the url for jQuery and D3
+var url = "https://spreadsheets.google.com/feeds/list/" + sKey + "/od6/public/values?alt=json";
+
+//D3 only
+d3.json(url, function (error, result) {
+    var data = [];
+    for (var i = 0; i < result.feed.entry.length; i += 1) {
+        data.push({
+            "animal": result.feed.entry[i].gsx$animal.$t,
+            "population": result.feed.entry[i].gsx$population.$t
+        });
+    }
+    pie_chart(data, "#chart1");
+});
+
+var csvData = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTB1cK_oktZeJY1YnW9tAh8BsyJt-wH12d1qdPoSYil---tmpy-GuKdSl6t3cWCUiwuvbsBaYl4xVR/pub?gid=1609137887&single=true&output=csv';
+
+var data2 = d3.csv(csvData);
+console.log(data2);
+
+
+
+
+var data = [
+{date:"PersonA", MD1:1.30, MD2:1.40, MD3:1.22},
+{date:"PersonB", MD1:.89, MD2:.84, MD3:.73},
+{date:"PersonC", MD1:.39, MD2:.24, MD3:.53}     
+];
+
+//console.log(data);
+  
+  data.columns = ["date", "MD1", "MD2", "MD3"];
+  data.columns2 = ["date", "MD1", "MD2", "MD3"];
+
+  //console.log(data);
+ 
+
+
+  console.log(data);
+
+
+  var series = data.columns.slice(1).map(function(key) {
+    return data.map(function(d) {
+      console.log(key + " " + d.date + " " + d[key]);
+      return {
+        key: key,
+        date: d.date,
+        value: d[key]
+      };
+    });
+  });
+
+    var seriesB = [];
+
+    data2.forEach((element, index) => {
+      var newPerson = [];
+      keys = Object.keys(element);
+      values = Object.values(element);
+      console.log(keys);
+      console.log(values);
+      keys.slice(1).forEach((element, index) => {
+        var newRating = {key: values[0], date: keys[index+1], value: values[index+1]};
+        newPerson.push(newRating);
+      });
+      seriesB.push(newPerson);
+
+    });
+
+  console.log(series);
+  console.log(seriesB);
+
+  var legend = ["PersonA", "PersonB", "PersonC"];
+  var legend2 = ["MD1", "MD2", "MD3"];
+
+  var x = d3.scalePoint()
+      .domain(legend2) //what start and stop value for x axis
+      .range([0, width]); //physical pixels
+
+  var y = d3.scaleLinear()
+      .domain([0, 2])//.domain([0, d3.max(series, function(s) { return d3.max(s, function(d) { return d.value; }); })])
+      .range([height, 0]);
+
+  var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+  g.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+  var serie = g.selectAll(".serie")
+      .data(seriesB)
+    .enter().append("g")
+      .attr("class", "serie");
+
+      //making lines
+  serie.append("path")
+      .attr("class", "line")
+      .style("stroke", function(d) { return z(d[0].key); })
+      .attr("d", d3.line()
+          .x(function(d) { return x(d.date); })
+          .y(function(d) { return y(d.value); }));
+
+      //setting up labels
+  var label = serie.selectAll(".label")
+      .data(function(d) { return d; })
+    .enter().append("g")
+      .attr("class", "label")
+      .attr("transform", function(d, i) { return "translate(" + x(d.date) + "," + y(d.value) + ")"; });
+
+      //line and element labels
+  label.append("text")
+      .attr("dy", ".35em")
+      .text(function(d) { return d.value; })
+    .filter(function(d, i) { return i === data.length - 1; })
+    .append("tspan")
+      .attr("class", "label-key")
+      .text(function(d) { return " " + d.key; });
+
+      //padding for labels
+  label.insert("rect", "text")
+      .datum(function() { return this.nextSibling.getBBox(); })
+      .attr("x", function(d) { return d.x - labelPadding; })
+      .attr("y", function(d) { return d.y - labelPadding; })
+      .attr("width", function(d) { return d.width + 2 * labelPadding; })
+      .attr("height", function(d) { return d.height + 2 * labelPadding; });
+
+</script>
